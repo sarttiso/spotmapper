@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 from scipy.spatial import distance_matrix
 from scipy.optimize import minimize
@@ -6,6 +7,8 @@ from PIL import Image
 from pathlib import Path
 import os
 import ipywidgets as widgets
+
+import matplotlib.pyplot as plt
 
 
 class GrainMap:
@@ -110,10 +113,20 @@ def px2um(xml_path):
     return (height_px/height_m)*1e-6
 
 
-def xml_widget_generator(xml_path):
-    xml_paths = [path for path in Path(xml_path).rglob('*.xml')]
-    xml_files = [os.path.basename(path) for path in xml_paths]
-    dropdown_widget = widgets.Dropdown(options=list(zip(xml_files, xml_paths)))
+def file_path_widget_generator(root_path, file_type):
+    """return a widget that allows a user to select an xml file to work with
+
+    Args:
+        root_path (str): path that contains all the xml files of interest (will be
+        searched recursively)
+        file_type (str): file ending to search for in 
+
+    Returns:
+        ipywidgets.widget: widget to select an xml file
+    """
+    paths = [path for path in Path(root_path).rglob(f'*{file_type}')]
+    files = [os.path.basename(path) for path in paths]
+    dropdown_widget = widgets.Dropdown(options=list(zip(files, paths)))
     return dropdown_widget
 
 
@@ -125,7 +138,7 @@ def px2um_widget_generator(xml_root_path):
         xml_root_path (str): base path containing all xml files of interest
     """
     # select xml of interest
-    xml_selector_widget = xml_widget_generator(xml_root_path)
+    xml_selector_widget = file_path_widget_generator(xml_root_path, '.xml')
 
     # micron amount to convert to pixels
     micron_widget = widgets.BoundedFloatText(value=20, 
@@ -133,6 +146,7 @@ def px2um_widget_generator(xml_root_path):
                                              step=1,
                                              description='microns')
 
+    # little private function just for the widget
     def px2um2(xml_path, micron):
         print(f'pixels per {micron} micron: {micron*px2um(xml_path):1.2f}')
 
@@ -143,6 +157,74 @@ def px2um_widget_generator(xml_root_path):
 
     # set up interface
     interactive_widget = widgets.VBox([widgets.HBox([xml_selector_widget, micron_widget]),
+                  out_widget])
+
+    return interactive_widget
+
+
+def get_iolite_xy(iolog_path):
+    """return comment and x,y coords for an iolite laser log file
+
+    Args:
+        iolog_path (str): path to the iolite.csv laser log file
+
+    Returns:
+        pandas.DataFrame: dataframe with comment, x, y columns
+    """
+    # read csv
+    iolog_df = pd.read_csv(iolog_path).dropna(subset=[' Comment'])
+
+    # get comment, x, y
+    iolog_df = iolog_df[[' Comment', ' X', ' Y']]
+
+    # rename columns to remove leading spaces
+    iolog_df.columns = iolog_df.columns.str.lstrip()
+
+    return iolog_df
+
+
+def plot_iolog(iolog_df):
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.axis('equal')
+
+    ax.plot(iolog_df['X'], iolog_df['Y'], 'o')
+    for ii in range(len(iolog_df)):
+        ax.text(iolog_df.iloc[ii]['X'], 
+                iolog_df.iloc[ii]['Y'], 
+                iolog_df.iloc[ii]['Comment'])
+        
+    # don't forget that y increases down!
+    ax.invert_yaxis()
+
+    # return fig, ax
+
+
+def iolog_plot_widget_generator(iolite_csv_root_path):
+    # select the iolite file of interest
+    iolog_selector_widget = file_path_widget_generator(iolite_csv_root_path, '.Iolite.csv')
+
+    # filter spot to plot on comment prefix
+    filter_widget = widgets.Text(description='Filter String')
+
+    # private fucntion for widget to plot filtered points
+    def plot_filtered_iolog(iolog_path, filter_str):
+        # get whole log
+        iolog_df = get_iolite_xy(iolog_path)
+
+        # filter
+        iolog_df = iolog_df[iolog_df['Comment'].str.contains(filter_str)]
+
+        # plot!
+        plot_iolog(iolog_df)
+
+    # output widget
+    out_widget = widgets.interactive_output(plot_filtered_iolog,
+                                                    {'iolog_path': iolog_selector_widget,
+                                                     'filter_str': filter_widget})
+
+    # interface
+    interactive_widget = widgets.VBox([widgets.HBox([iolog_selector_widget, filter_widget]),
                   out_widget])
 
     return interactive_widget
