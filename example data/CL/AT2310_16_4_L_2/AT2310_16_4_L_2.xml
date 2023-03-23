@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<MappingResults xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Overlap>0.1</Overlap>
+  <NumberOfImagesX>4</NumberOfImagesX>
+  <NumberOfImagesY>1</NumberOfImagesY>
+  <Images>
+    <anyType xsi:type="SEMImage">
+      <FileName>AT2310_16_4_L_2_1.tif</FileName>
+      <BeamShiftX>0</BeamShiftX>
+      <BeamShiftY>0</BeamShiftY>
+      <StageX>0.012963500000000001</StageX>
+      <StageY>-0.00026512499999999995</StageY>
+      <HorizontalFieldWidth>0.00027965422967394864</HorizontalFieldWidth>
+      <VerticalFieldHeight>0.00024142025296071347</VerticalFieldHeight>
+    </anyType>
+    <anyType xsi:type="SEMImage">
+      <FileName>AT2310_16_4_L_2_2.tif</FileName>
+      <BeamShiftX>0</BeamShiftX>
+      <BeamShiftY>0</BeamShiftY>
+      <StageX>0.013215000000000001</StageX>
+      <StageY>-0.00026512499999999995</StageY>
+      <HorizontalFieldWidth>0.00027965422967394864</HorizontalFieldWidth>
+      <VerticalFieldHeight>0.00024142025296071347</VerticalFieldHeight>
+    </anyType>
+    <anyType xsi:type="SEMImage">
+      <FileName>AT2310_16_4_L_2_3.tif</FileName>
+      <BeamShiftX>0</BeamShiftX>
+      <BeamShiftY>0</BeamShiftY>
+      <StageX>0.013466750000000001</StageX>
+      <StageY>-0.00026512499999999995</StageY>
+      <HorizontalFieldWidth>0.00027965422967394864</HorizontalFieldWidth>
+      <VerticalFieldHeight>0.00024142025296071347</VerticalFieldHeight>
+    </anyType>
+    <anyType xsi:type="SEMImage">
+      <FileName>AT2310_16_4_L_2_4.tif</FileName>
+      <BeamShiftX>0</BeamShiftX>
+      <BeamShiftY>0</BeamShiftY>
+      <StageX>0.013718250000000001</StageX>
+      <StageY>-0.00026512499999999995</StageY>
+      <HorizontalFieldWidth>0.00027965422967394864</HorizontalFieldWidth>
+      <VerticalFieldHeight>0.00024142025296071347</VerticalFieldHeight>
+    </anyType>
+  </Images>
+</MappingResults>
