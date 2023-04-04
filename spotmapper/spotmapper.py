@@ -207,13 +207,20 @@ def iolog_plot_widget_generator(iolite_csv_root_path):
     # filter spot to plot on comment prefix
     filter_widget = widgets.Text(description='Filter String')
 
-    # private fucntion for widget to plot filtered points
-    def plot_filtered_iolog(iolog_path, filter_str):
+    # optionally remove the filter string from the labelling text
+    label_filter_widget = widgets.Checkbox(value=False, 
+                                         description='Remove filter string from labels?')
+
+    # private function for widget to plot filtered points
+    def plot_filtered_iolog(iolog_path, filter_str, label_filter):
         # get whole log
         iolog_df = get_iolite_xy(iolog_path)
 
         # filter
         iolog_df = iolog_df[iolog_df['Comment'].str.contains(filter_str)]
+
+        if label_filter:
+            iolog_df['Comment'] = iolog_df['Comment'].str.split(filter_str).str[1]
 
         # plot!
         plot_iolog(iolog_df)
@@ -221,10 +228,11 @@ def iolog_plot_widget_generator(iolite_csv_root_path):
     # output widget
     out_widget = widgets.interactive_output(plot_filtered_iolog,
                                                     {'iolog_path': iolog_selector_widget,
-                                                     'filter_str': filter_widget})
+                                                     'filter_str': filter_widget,
+                                                     'label_filter': label_filter_widget})
 
     # interface
-    interactive_widget = widgets.VBox([widgets.HBox([iolog_selector_widget, filter_widget]),
+    interactive_widget = widgets.VBox([widgets.HBox([iolog_selector_widget, filter_widget, label_filter_widget]),
                   out_widget])
 
     return interactive_widget
