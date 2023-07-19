@@ -10,6 +10,8 @@ import ipywidgets as widgets
 
 import matplotlib.pyplot as plt
 
+# default style
+style_def = {'description_width': 'initial'}
 
 class GrainMap:
     """
@@ -210,9 +212,19 @@ def iolog_plot_widget_generator(iolite_csv_root_path):
     # optionally remove the filter string from the labelling text
     label_filter_widget = widgets.Checkbox(value=False, 
                                          description='Remove filter string from labels?')
+    
+    # optionally filter a range of numbers to plot
+    toggle_range_filter_widget = widgets.ToggleButton(value=False, 
+                                                      description='Filter spot range')
+    begin_range_widget = widgets.IntText(value=0,
+                                         description='First Spot Number',
+                                         style=style_def)
+    end_range_widget = widgets.IntText(value=0,
+                                       description='Last Spot Number',
+                                       style=style_def)
 
     # private function for widget to plot filtered points
-    def plot_filtered_iolog(iolog_path, filter_str, label_filter):
+    def plot_filtered_iolog(iolog_path, filter_str, label_filter, range_filter, begin, end):
         # get whole log
         iolog_df = get_iolite_xy(iolog_path)
 
@@ -222,6 +234,13 @@ def iolog_plot_widget_generator(iolite_csv_root_path):
         if label_filter:
             iolog_df['Comment'] = iolog_df['Comment'].str.split(filter_str).str[1]
 
+        if range_filter:
+            # assumes that iolog_df['Comment] can be an integer
+            spot_nums = iolog_df['Comment'].values.astype(int)
+            idx = (spot_nums >= begin) & (spot_nums <= end)
+            iolog_df = iolog_df.iloc[idx]
+
+
         # plot!
         plot_iolog(iolog_df)
 
@@ -229,10 +248,20 @@ def iolog_plot_widget_generator(iolite_csv_root_path):
     out_widget = widgets.interactive_output(plot_filtered_iolog,
                                                     {'iolog_path': iolog_selector_widget,
                                                      'filter_str': filter_widget,
-                                                     'label_filter': label_filter_widget})
+                                                     'label_filter': label_filter_widget,
+                                                     'range_filter': toggle_range_filter_widget,
+                                                     'begin': begin_range_widget,
+                                                     'end': end_range_widget})
 
     # interface
-    interactive_widget = widgets.VBox([widgets.HBox([iolog_selector_widget, filter_widget, label_filter_widget]),
+    interactive_widget = widgets.VBox([widgets.VBox([widgets.HBox([iolog_selector_widget, 
+                                                     filter_widget, 
+                                                     label_filter_widget]),
+                                                     widgets.HBox([
+                                                         toggle_range_filter_widget,
+                                                         begin_range_widget,
+                                                         end_range_widget
+                                                     ])]),
                   out_widget])
 
     return interactive_widget
